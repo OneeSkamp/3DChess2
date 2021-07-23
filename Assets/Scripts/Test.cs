@@ -1,25 +1,47 @@
+using System;
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Test : MonoBehaviour {
 
-    private string [,] board = new [, ]{{"x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"},
-                                        {"x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"},
-                                        {"x", "x", "r", "n", "b", "q", "k", "b", "n", "r", "x", "x"},
-                                        {"x", "x", "p", "p", "p", "p", "p", "p", "p", "p", "x", "x"},
-                                        {"x", "x", ".", ".", ".", ".", ".", ".", ".", ".", "x", "x"},
-                                        {"x", "x", ".", ".", ".", ".", ".", ".", ".", ".", "x", "x"},
-                                        {"x", "x", ".", ".", ".", ".", ".", ".", ".", ".", "x", "x"},
-                                        {"x", "x", ".", ".", ".", ".", ".", ".", ".", ".", "x", "x"},
-                                        {"x", "x", "P", "P", "P", "P", "P", "P", "P", "P", "x", "x"},
-                                        {"x", "x", "R", "N", "B", "Q", "K", "B", "N", "R", "x", "x"},
-                                        {"x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"},
-                                        {"x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"}};
+   public enum figures {
+
+        whiteKing = 'K',
+        whiteQueen = 'Q',
+        whiteRook = 'R',
+        whiteBishop = 'B',
+        whiteKnight = 'N',
+        whitePawn = 'P',
+ 
+        blackKing = 'k',
+        blackQueen = 'q',
+        blackRook = 'r',
+        blackBishop = 'b',
+        blackKnight = 'n',
+        blackPawn = 'p'
+    }
+
+    public bool whiteMove = true;
+
+    private char [,] board = new [, ]{  {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
+                                        {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
+                                        {'x', 'x', 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'x', 'x'},
+                                        {'x', 'x', 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'x', 'x'},
+                                        {'x', 'x', '.', 'P', 'P', '.', '.', '.', '.', '.', 'x', 'x'},
+                                        {'x', 'x', '.', '.', '.', '.', '.', '.', '.', '.', 'x', 'x'},
+                                        {'x', 'x', '.', '.', '.', '.', '.', '.', '.', '.', 'x', 'x'},
+                                        {'x', 'x', '.', '.', '.', '.', '.', '.', '.', '.', 'x', 'x'},
+                                        {'x', 'x', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'x', 'x'},
+                                        {'x', 'x', 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R', 'x', 'x'},
+                                        {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
+                                        {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'}};
 
     // private string [,] GetBoard (string [,] board = startBoard) {
-    //     return board;
+    // return board;
     // }
+
     struct FigureOnCell {
         public Cell cell;
         public Figure figure;
@@ -31,7 +53,19 @@ public class Test : MonoBehaviour {
     }
 
     struct Figure {
-        public string type;
+        public char type;
+        public bool white;
+        public bool White {
+            private set{
+                if (Char.IsUpper(type)) {
+                white = true;
+            } else {
+                white = false;
+            }}            
+            get {
+                return white;
+            } 
+        }
     }
 
     private FigureOnCell GetFigureOnCell (Figure figure, Cell cell) {
@@ -64,48 +98,97 @@ public class Test : MonoBehaviour {
     private void MoveFigure (Cell from, Cell to) {
 
         board[to.X, to.Y] = board[from.X, from.Y];
-        board[from.X, from.Y] = ".";
+        board[from.X, from.Y] = '.';
     } 
 
     private bool [,] GetMovePawnMap(FigureOnCell figureOnCell) {
         
-        bool [,] moveMap = new bool [12,12];
-        string figure = figureOnCell.figure.type;
+        bool [,] movePawnMap = new bool [12,12];
+
+        Figure figure = figureOnCell.figure;
+        Cell leftDiagonalCell;
+        Cell rightDiagonalCell;
+        Figure leftDiagonalFigure;
+        Figure rightDiagonalFigure;
+
         Cell cell = figureOnCell.cell;
-        
-        if (figure == "p" && cell.X == 3) {
-            moveMap[cell.X + 1, cell.Y] = true;
-            moveMap[cell.X + 2, cell.Y] = true;
-        } 
-        else if (figure == "p" && cell.X != 2) {
-            moveMap[cell.X + 1, cell.Y] = true;
+
+        if (figure.type == 'p') {
+            leftDiagonalCell = GetCell(cell.X, cell.Y - 2);
+            rightDiagonalCell = GetCell(cell.X + 1, cell.Y + 1);
+            leftDiagonalFigure = GetFigure(leftDiagonalCell);
+            rightDiagonalFigure = GetFigure(rightDiagonalCell);
+            
+            Debug.Log(leftDiagonalFigure.type);
+
+            Debug.Log(figure.white);
+
+            Debug.Log(leftDiagonalFigure.white);
+
+            if (cell.X == 3) {
+                movePawnMap[cell.X + 1, cell.Y] = true;
+                movePawnMap[cell.X + 2, cell.Y] = true;
+            }
+
+            else if (cell.X != 3) {
+                movePawnMap[cell.X + 1, cell.Y] = true;
+            }
+
+            if (figure.white != leftDiagonalFigure.white 
+                && leftDiagonalFigure.type != 'x') {
+
+                movePawnMap[cell.X + 1, cell.Y - 1] = true;
+            }
+
+            if (figure.white != rightDiagonalFigure.white 
+                && rightDiagonalFigure.type != 'x') {
+                movePawnMap[cell.X + 1, cell.Y + 1] = true;
+            }
+
         }
 
-        if (figure == "P" && cell.X == 8) {
-            moveMap[cell.X - 1, cell.Y] = true;
-            moveMap[cell.X - 2, cell.Y] = true;
-        }
+        if (figure.type == 'P') {
+            leftDiagonalCell = GetCell(cell.X - 1, cell.Y - 1);
+            rightDiagonalCell = GetCell(cell.X - 1, cell.Y + 1);
+            leftDiagonalFigure = GetFigure(leftDiagonalCell);
+            rightDiagonalFigure = GetFigure(rightDiagonalCell);
 
-        else if (figure == "P" && cell.X != 8) {
-            moveMap[cell.X - 1, cell.Y] = true;
-        }
+            if (cell.X == 8) {
+                movePawnMap[cell.X - 1, cell.Y] = true;
+                movePawnMap[cell.X - 2, cell.Y] = true;
+            }
+            else if (cell.X != 8) {
+                movePawnMap[cell.X - 1, cell.Y] = true;
+            }
 
-        return moveMap;
+            if (figure.white != leftDiagonalFigure.white 
+                && leftDiagonalFigure.type != 'x') {
+                movePawnMap[cell.X - 1, cell.Y - 1] = true;
+            }
+
+            if (figure.white != rightDiagonalFigure.white 
+                && rightDiagonalFigure.type != 'x') {
+                movePawnMap[cell.X - 1, cell.Y + 1] = true;
+            }
+
+        }
+        return movePawnMap;
     }
 
     private void Start() {
-
-        var cell = GetCell (7, 1);
+        var cell = GetCell (2, 3);
         var figure = GetFigure (cell);
         var figureOnCell = GetFigureOnCell (figure, cell);
-        var moveMap = GetMovePawnMap(figureOnCell);
+        var movePawnMap = GetMovePawnMap(figureOnCell);
         
         for (int i = 0; i < 12; i++) {
-            Debug.Log($"{board[0, i]} {board[1, i]} {board[2, i]} {board[3, i]} {board[4, i]} {board[5, i]} {board[6, i]} {board[7, i]} {board[8, i]} {board[9, i]} {board[10, i]} {board[11, i]}");
+            Debug.Log($"{board[i, 0]} {board[i, 1]} {board[i, 2]} {board[i, 3]} {board[i, 4]} {board[i, 5]} {board[i, 6]} {board[i, 7]} {board[i, 8]} {board[i, 9]} {board[i, 10]} {board[i, 11]}");
         } 
 
         for (int i = 0; i < 12; i++) {
-            Debug.Log($"{moveMap[0, i]} {moveMap[1, i]} {moveMap[2, i]} {moveMap[3, i]} {moveMap[4, i]} {moveMap[5, i]} {moveMap[6, i]} {moveMap[7, i]} {moveMap[8, i]} {moveMap[9, i]} {moveMap[10, i]} {moveMap[11, i]}");
-        }        
+            Debug.Log($"{movePawnMap[i, 0]} {movePawnMap[i, 1]} {movePawnMap[i, 2]} {movePawnMap[i, 3]} {movePawnMap[i, 4]} {movePawnMap[i, 5]} {movePawnMap[i, 6]} {movePawnMap[i, 7]} {movePawnMap[i, 8]} {movePawnMap[i, 9]} {movePawnMap[i, 10]} {movePawnMap[i, 11]}");
+        }
+
+        Debug.Log(figure.type);        
     }
 }
