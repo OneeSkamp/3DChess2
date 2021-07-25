@@ -1,0 +1,52 @@
+{
+    "name": "ChessControls",
+    "maps": [
+        {
+            "name": "Chess",
+            "id": "9cceda6b-3e74-4742-8aec-f1a7adeb7e28",
+            "actions": [
+                {
+                    "name": "Click",
+                    "type": "Button",
+                    "id": "9478cead-0d07-4f78-891d-3c9eae42d61e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "MousePosition",
+                    "type": "Value",
+                    "id": "a821a8e4-4eb6-4e11-83e7-198efc330e81",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b01ac413-38ba-49e7-bbab-ffe31b17abfb",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0abb5d5f-59d2-44bf-8a53-d76859288735",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MousePosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
