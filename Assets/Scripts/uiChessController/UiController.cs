@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using boardManager;
 
-namespace test {
-public class TestSelector : MonoBehaviour {
+namespace uiChessController {
+public class UiController : MonoBehaviour {
     public GameObject blueBacklight;
     public GameObject blackPawn; 
     public GameObject blackKing; 
@@ -17,6 +18,7 @@ public class TestSelector : MonoBehaviour {
     public GameObject whiteBishop; 
     public GameObject whiteQueen;
     private ChessControls chessAction;
+    public BoardManager boardManager = new BoardManager(); 
     public int x;
     public int y;
     private Ray ray;
@@ -24,7 +26,6 @@ public class TestSelector : MonoBehaviour {
 
     public List<GameObject> possibleMoves = new List<GameObject>();
     public GameObject [,]  figuresMap = new GameObject[8,8];
-
     private void OnEnable() {
         chessAction.Enable();    
     }
@@ -60,15 +61,14 @@ public class TestSelector : MonoBehaviour {
     } 
 
     private void MoveFigure(int toX , int toY) {
-        
-        
-        if(figuresMap[toX,toY]!=null){
+        if(figuresMap[toX,toY] != null){
             Destroy(figuresMap[toX,toY]);
         }
-        figuresMap[BoardManager.activeFigure.x-2,BoardManager.activeFigure.y-2].transform.position=new Vector3(3.5f-toX,0.5f,3.5f-toY);
-        figuresMap[toX,toY] = figuresMap[BoardManager.activeFigure.x-2,BoardManager.activeFigure.y-2];
-        figuresMap[BoardManager.activeFigure.x-2,BoardManager.activeFigure.y-2]=null;
-        BoardManager.MoveFigure(BoardManager.activeFigure, toX+2, toY+2);
+        figuresMap[boardManager.activeFigure.x - 2,boardManager.activeFigure.y - 2].
+        transform.position = new Vector3(3.5f - toX, 0.5f, 3.5f - toY);
+        figuresMap[toX, toY] = figuresMap[boardManager.activeFigure.x - 2,boardManager.activeFigure.y - 2];
+        figuresMap[boardManager.activeFigure.x-2,boardManager.activeFigure.y-2]=null;
+        boardManager.MoveFigure(boardManager.activeFigure, toX + 2, toY + 2);
         CleaningPossibleMoves();
     }
 
@@ -78,7 +78,6 @@ public class TestSelector : MonoBehaviour {
         for (int i = 0; i < board.GetLength(0) - 4; i++) {
 
             for (int j = 0; j < board.GetLength(1) - 4; j++) {
-                //var figure = figuresMap[i, j]; 
                 switch (board[i + 2,j + 2]) {
                     case 'p':
                         figuresMap[i, j] = Instantiate(blackPawn,
@@ -139,29 +138,39 @@ public class TestSelector : MonoBehaviour {
     private void MouseClick() {
         ray = Camera.main.ScreenPointToRay(chessAction.Chess.MousePosition.ReadValue<Vector2>());
         if(Physics.Raycast(ray, out hit)) {
-            x = Mathf.Abs((int)(hit.point.x-4));
-            y = Mathf.Abs((int)(hit.point.z-4));
 
-            if(BoardManager.canMoveMap[x+2,y+2] == true){
+            for (int i = 0; i < 12; i++) {
+                for (int j = 0; j < 12; j++) {
+                    Debug.Log(boardManager.board[i,j]);
+                }
+            }
+
+            x = Mathf.Abs((int)(hit.point.x - 4));
+            y = Mathf.Abs((int)(hit.point.z - 4));
+
+            if(boardManager.canMoveMap[x + 2, y + 2] == true){
                 MoveFigure(x,y);
                 CleaningPossibleMoves();    
             }
             else{
                 CleaningPossibleMoves();
-                BoardManager.CleaningCanMoveMap();
-                BoardManager.activeFigure = BoardManager.GetActiveFigure(BoardManager.GetFigure(x + 2, y + 2));
-                if(BoardManager.activeFigure!=null){
-                    BoardManager.canMoveMap = BoardManager.GetMovePawnMap(BoardManager.activeFigure); 
+                boardManager.CleaningCanMoveMap();
+                boardManager.activeFigure = boardManager.GetActiveFigure(boardManager.GetFigure(x + 2, y + 2));
+                if(boardManager.activeFigure != null){
+                    boardManager.canMoveMap = boardManager.GetMovePawnMap(boardManager.activeFigure);
+                    boardManager.canMoveMap = boardManager.GetMoveKnightMap();
+                    boardManager.canMoveMap = boardManager.GetMoveRookMap();
+                    boardManager.canMoveMap = boardManager.GetMoveBishopMap();
+                    boardManager.canMoveMap = boardManager.GetMoveQueenMap();
+                    boardManager.canMoveMap = boardManager.GetMoveKingMap();
                 }
-                CreatingPossibleMoves(BoardManager.canMoveMap);
+                CreatingPossibleMoves(boardManager.canMoveMap);
             }
-            //Debug.Log($"{Mathf.Abs((int)(hit.point.x-4))}   {Mathf.Abs((int)(hit.point.z-4))}");
         }
     }
 
     private void Start() {
-        CreatingFiguresOnBoard(BoardManager.board);
-        
+        CreatingFiguresOnBoard(boardManager.board);       
     }
 }
 }
