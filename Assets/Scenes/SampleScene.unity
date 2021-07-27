@@ -470,6 +470,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blueBacklight: {fileID: 3335799049074940128, guid: ac19e2cf1ef80e645a38fd964624291a, type: 3}
+  redBacklight: {fileID: 1854007451881250227, guid: b345fd2cbe403644bbaa2fd103572e79, type: 3}
   blackPawn: {fileID: 1555947633139444, guid: 484e214fc05fe436393fd7787991ebfe, type: 3}
   blackKing: {fileID: 1822731811085762, guid: cd47671bc858649ed8445e605149f3e8, type: 3}
   blackRook: {fileID: 1764167493807252, guid: 27b957161063143d6a75fad94db1125f, type: 3}

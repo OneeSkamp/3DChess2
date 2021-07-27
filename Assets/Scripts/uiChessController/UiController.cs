@@ -5,6 +5,7 @@ using boardManager;
 namespace uiChessController {
 public class UiController : MonoBehaviour {
     public GameObject blueBacklight;
+    public GameObject redBacklight;
     public GameObject blackPawn; 
     public GameObject blackKing; 
     public GameObject blackRook; 
@@ -69,6 +70,7 @@ public class UiController : MonoBehaviour {
         figuresMap[toX, toY] = figuresMap[boardManager.activeFigure.x - 2,boardManager.activeFigure.y - 2];
         figuresMap[boardManager.activeFigure.x-2,boardManager.activeFigure.y-2]=null;
         boardManager.MoveFigure(boardManager.activeFigure, toX + 2, toY + 2);
+        CreatingCheck();
         CleaningPossibleMoves();
     }
 
@@ -135,16 +137,21 @@ public class UiController : MonoBehaviour {
         }
     }
 
+    private void CreatingCheck() {
+        if (boardManager.CheckKing()) {
+            Instantiate(redBacklight, new Vector3(3.5f - boardManager.king.x + 2, 0.5f, 3.5f - boardManager.king.y + 2),Quaternion.identity);
+        }       
+    }
+
     private void MouseClick() {
         ray = Camera.main.ScreenPointToRay(chessAction.Chess.MousePosition.ReadValue<Vector2>());
         if(Physics.Raycast(ray, out hit)) {
 
             for (int i = 0; i < 12; i++) {
                 for (int j = 0; j < 12; j++) {
-                    Debug.Log(boardManager.board[i,j]);
+                    //Debug.Log(boardManager.board[i,j]);
                 }
             }
-
             x = Mathf.Abs((int)(hit.point.x - 4));
             y = Mathf.Abs((int)(hit.point.z - 4));
 
@@ -154,10 +161,10 @@ public class UiController : MonoBehaviour {
             }
             else{
                 CleaningPossibleMoves();
-                boardManager.CleaningCanMoveMap();
+                boardManager.CleaningBoolMap(boardManager.canMoveMap);
                 boardManager.activeFigure = boardManager.GetActiveFigure(boardManager.GetFigure(x + 2, y + 2));
                 if(boardManager.activeFigure != null){
-                    boardManager.canMoveMap = boardManager.GetMovePawnMap(boardManager.activeFigure);
+                    boardManager.canMoveMap = boardManager.GetMovePawnMap(boardManager.activeFigure, false);
                     boardManager.canMoveMap = boardManager.GetMoveKnightMap();
                     boardManager.canMoveMap = boardManager.GetMoveRookMap();
                     boardManager.canMoveMap = boardManager.GetMoveBishopMap();

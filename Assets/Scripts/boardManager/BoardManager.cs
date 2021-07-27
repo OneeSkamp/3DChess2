@@ -7,7 +7,9 @@ public class BoardManager {
     public bool whiteMove = true;
     public bool isActive = false;
     public Figure activeFigure;
+    public Figure king;
     public bool [,] canMoveMap = new bool [12,12];
+    public bool [,] checkKingMap = new bool [12,12];
     public char [,] board = new [,]{{'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
                                     {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
                                     {'x', 'x', 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'x', 'x'},
@@ -50,11 +52,11 @@ public class BoardManager {
         return null;
     }   
 
-    public void CleaningCanMoveMap() {
-        for (int i = 0; i < canMoveMap.GetLength(0); i++) {
+    public void CleaningBoolMap(bool [,] map) {
+        for (int i = 0; i < map.GetLength(0); i++) {
           
-            for (int j = 0; j < canMoveMap.GetLength(1); j++) {
-                canMoveMap[i,j] = false;
+            for (int j = 0; j < map.GetLength(1); j++) {
+                map[i,j] = false;
             }
         }
     }
@@ -65,67 +67,78 @@ public class BoardManager {
             board[from.x, from.y] = '.';
             whiteMove = !whiteMove;
             Debug.Log(whiteMove);
-            CleaningCanMoveMap(); 
+            CleaningBoolMap(canMoveMap); 
+            CleaningBoolMap(checkKingMap);
+            GetCheckKingMap();
         }
         FindPawnForChange();
     } 
 
-    public bool [,] GetMovePawnMap(Figure figure) {
+    public bool [,] GetMovePawnMap(Figure figure, bool checkKing) {
 
         Figure leftDiagonalFigure;
-        Figure rightDiagonalFigure;
+        Figure rightDiagonalFigure; 
 
         if (figure.type == 'p') {
             leftDiagonalFigure = GetFigure(figure.x + 1, figure.y - 1);
             rightDiagonalFigure = GetFigure(figure.x + 1, figure.y + 1);
-
-            if (figure.x == 3 && board[figure.x + 1, figure.y] == '.'
-                && board[figure.x + 2, figure.y] == '.') {
+            if (!checkKing) {
+                if (figure.x == 3 && board[figure.x + 1, figure.y] == '.'
+                    && board[figure.x + 2, figure.y] == '.') {
                     canMoveMap[figure.x + 1, figure.y] = true;
                     canMoveMap[figure.x + 2, figure.y] = true;
+                }
+
+                else if (figure.x != 3 && board[figure.x + 1, figure.y] == '.') {
+                    canMoveMap[figure.x + 1, figure.y] = true;
+                }
+
+                if (Char.IsUpper(leftDiagonalFigure.type) 
+                    && leftDiagonalFigure.type != 'x'
+                    && leftDiagonalFigure.type != '.') {
+
+                        canMoveMap[figure.x + 1, figure.y - 1] = true;
+                }
+
+                if (Char.IsUpper(rightDiagonalFigure.type)
+                    && rightDiagonalFigure.type != 'x'
+                    && rightDiagonalFigure.type != '.') {
+                        canMoveMap[figure.x + 1, figure.y + 1] = true;
+                }
+            } else {
+                canMoveMap[figure.x + 1, figure.y - 1] = true;
+                canMoveMap[figure.x + 1, figure.y + 1] = true;
             }
 
-            else if (figure.x != 3 && board[figure.x + 1, figure.y] == '.') {
-                canMoveMap[figure.x + 1, figure.y] = true;
-            }
-
-            if (Char.IsUpper(leftDiagonalFigure.type) 
-                && leftDiagonalFigure.type != 'x'
-                && leftDiagonalFigure.type != '.') {
-
-                    canMoveMap[figure.x + 1, figure.y - 1] = true;
-            }
-
-            if (Char.IsUpper(rightDiagonalFigure.type)
-                && rightDiagonalFigure.type != 'x'
-                && rightDiagonalFigure.type != '.') {
-                    canMoveMap[figure.x + 1, figure.y + 1] = true;
-            }
         }
 
         if (figure.type == 'P') {
             leftDiagonalFigure = GetFigure(figure.x - 1, figure.y - 1);
             rightDiagonalFigure = GetFigure(figure.x - 1, figure.y + 1);
-
-            if (figure.x == 8 && board[figure.x - 1, figure.y] == '.'
-                && board[figure.x - 2, figure.y] == '.') {
+            if (!checkKing) {
+                if (figure.x == 8 && board[figure.x - 1, figure.y] == '.'
+                    && board[figure.x - 2, figure.y] == '.') {
+                        canMoveMap[figure.x - 1, figure.y] = true;
+                        canMoveMap[figure.x - 2, figure.y] = true;
+                }
+                else if (figure.x != 8 && board[figure.x - 1, figure.y] == '.') {
                     canMoveMap[figure.x - 1, figure.y] = true;
-                    canMoveMap[figure.x - 2, figure.y] = true;
-            }
-            else if (figure.x != 8 && board[figure.x - 1, figure.y] == '.') {
-                canMoveMap[figure.x - 1, figure.y] = true;
-            }
+                }
 
-            if (!Char.IsUpper(leftDiagonalFigure.type) 
-                && leftDiagonalFigure.type != 'x'
-                && leftDiagonalFigure.type != '.') {
-                    canMoveMap[figure.x - 1, figure.y - 1] = true;
-            }
+                if (!Char.IsUpper(leftDiagonalFigure.type) 
+                    && leftDiagonalFigure.type != 'x'
+                    && leftDiagonalFigure.type != '.') {
+                        canMoveMap[figure.x - 1, figure.y - 1] = true;
+                }
 
-            if (!Char.IsUpper(rightDiagonalFigure.type) 
-                && rightDiagonalFigure.type != 'x'
-                && rightDiagonalFigure.type != '.') {
-                    canMoveMap[figure.x - 1, figure.y + 1] = true;
+                if (!Char.IsUpper(rightDiagonalFigure.type) 
+                    && rightDiagonalFigure.type != 'x'
+                    && rightDiagonalFigure.type != '.') {
+                        canMoveMap[figure.x - 1, figure.y + 1] = true;
+                }
+            } else {
+                canMoveMap[figure.x - 1, figure.y - 1] = true;
+                canMoveMap[figure.x - 1, figure.y + 1] = true;
             }
         }
         return canMoveMap;
@@ -258,6 +271,49 @@ public class BoardManager {
         }
     }
 
+    public void GetCheckKingMap() {
+        bool figureColor;
+        if (whiteMove) {
+            figureColor = false;
+        } else {
+            figureColor = true;
+        }
+        for (int i = 0; i < 12; i++) {
+            for (int j = 0; j < 12; j++) {
+                Figure figure = GetFigure(i, j);
+                if (figure.type == 'K' && !figureColor) {
+                    king = GetFigure(i,j);
+                }
+                if (figure.type == 'k' && figureColor) {
+                    king = GetFigure(i,j);
+                }
+                if (figure.type != 'x' && figure.type != '.' && Char.IsUpper(figure.type) == figureColor) {
+                    activeFigure = figure;
+                    GetMoveBishopMap();
+                    GetMoveKnightMap();
+                    GetMoveQueenMap();
+                    GetMoveRookMap();
+                    GetMovePawnMap(figure, true);
+                }                       
+            }
+        }
+        
+        checkKingMap = (bool[,])canMoveMap.Clone();
+        //CheckKing();
+        CleaningBoolMap(canMoveMap);
+        
+        for (int i = 2; i < 10; i++) {
+            //Debug.Log($"{checkKingMap[i,2]} {checkKingMap[i,3]} {checkKingMap[i,4]} {checkKingMap[i,5]} {checkKingMap[i,6]} {checkKingMap[i,7]}{checkKingMap[i,8]}{checkKingMap[i,9]}{checkKingMap[i,10]}");
+        }
+    }
+    public bool CheckKing() {
+        if (checkKingMap[king.x, king.y]) {
+            Debug.Log("шах");
+            
+            return true;
+        }
+        return false;
+    }
     public void FindPawnForChange() {
         for(int i = 2; i < 8; i++) {
             if (board[2, i] == 'P') {
